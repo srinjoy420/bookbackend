@@ -1,6 +1,10 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcryptjs"
-import {AvalibleUserRoles} from "../utils/constains.js"
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import {AvalibleUserRoles} from "../utils/constains.js";
+import dotenv from "dotenv";
+dotenv.config();
 const userSchema = new Schema({
     avatar: {
         type: String,
@@ -82,5 +86,41 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.ispasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
   };
+
+
+// generate the acces token
+userSchema.methods.generateAcessToken=function(){
+    return jwt.sign(
+        {
+            _id:this._id,
+            email:this.email,
+            firstname:this.firstname,
+            lastname:this.lastname,
+            role:this.role
+        },
+        process.env.TOKEN_SECRET,
+        {expiresIn:process.env.TOKEN_EXPIRY}
+    )
+}
+//generate refreshToken
+userSchema.methods.generateRefreshToken=function(){
+    return jwt.sign(
+        {
+            _id:this._id
+        },
+         process.env.TOKEN_SECRET,
+        {expiresIn:process.env.TOKEN_EXPIRY}
+    )
+}
+// for email verification
+userSchema.methods.generatetemporaryToken=function(){
+    const unHasedToken= crypto.randomBytes(20).toString("hex");
+    const hasedToken=crypto.createHash("sha256").update(unHasedToken).digest("hex");
+    const tokeExpiry=Date.now()+(20*60*100)
+    return {unHasedToken,hasedToken,tokeExpiry}
+
+}
 const User = mongoose.model("User", userSchema)
 export default User
+
+
