@@ -10,7 +10,7 @@ export const sendmail = async (options) => {
         theme: 'default',
         product: {
 
-            name: 'Task Manager',
+            name: 'Book Bazar',
             link: 'https://mailgen.js/'
 
         }
@@ -71,7 +71,7 @@ export const emailVerificationMailgenContent = (username, verificationUrl) => {
     }
 }
 
-const forgotPasswordMailgenContent = (username, passwordResetUrl) => {
+export const forgotPasswordMailgenContent = (username, passwordResetUrl) => {
     return {
         body: {
             name: username,

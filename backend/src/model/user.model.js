@@ -52,7 +52,7 @@ const userSchema = new Schema({
         type:String,
     },
     forgotpasswordExpiry:{
-        typr:Date
+        type:Date
     },
       refreshToken:{
         type:String,
@@ -116,7 +116,7 @@ userSchema.methods.generateRefreshToken=function(){
 userSchema.methods.generatetemporaryToken=function(){
     const unHasedToken= crypto.randomBytes(20).toString("hex");
     const hasedToken=crypto.createHash("sha256").update(unHasedToken).digest("hex");
-    const tokeExpiry=Date.now()+(20*60*100)
+   const tokeExpiry = new Date(Date.now() + 20 * 60 * 1000)
     return {unHasedToken,hasedToken,tokeExpiry}
 
 }
