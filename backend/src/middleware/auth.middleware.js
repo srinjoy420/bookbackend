@@ -30,3 +30,26 @@ export const isLoggedin = async (req, res, next) => {
 
 
 }
+//middleweere to check the role is sheller or not
+export const issheller = async (req, res, next) => {
+  try {
+    const userId = req.user?._id;
+    const role = req.user?.role;
+
+    if (!userId || role !== "sheller") {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized as a seller.",
+      });
+    }
+
+    // Proceed to the next middleware/handler
+    next();
+  } catch (error) {
+    console.error("Middleware error in issheller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
