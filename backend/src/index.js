@@ -7,12 +7,14 @@ dotenv.config()
 //imports the routes
 import authrouter from "./routes/auth.routes.js"//auth router
 import bookrouter from './routes/book.routes.js'//book router
+import reviewRouter from  './routes/review.routes.js'//reviwe router
 const app = express()
 app.use(cookieParser())
 app.use(express.json())
 // use the routes
 app.use("/api/v1/auth",authrouter) //auth
 app.use("/api/v1/book",bookrouter)
+app.use("/api/v1/review",reviewRouter)
 
 
 const PORT=process.env.PORT || 8000
@@ -22,5 +24,5 @@ connectDB()
   })
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`)
+  console.log(` app listening on port ${PORT}`)
 })
