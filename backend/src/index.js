@@ -8,6 +8,7 @@ dotenv.config()
 import authrouter from "./routes/auth.routes.js"//auth router
 import bookrouter from './routes/book.routes.js'//book router
 import reviewRouter from  './routes/review.routes.js'//reviwe router
+import oderRouter from "./routes/order.routes.js"//order router
 const app = express()
 app.use(cookieParser())
 app.use(express.json())
@@ -15,6 +16,7 @@ app.use(express.json())
 app.use("/api/v1/auth",authrouter) //auth
 app.use("/api/v1/book",bookrouter)
 app.use("/api/v1/review",reviewRouter)
+app.use("/api/v1/order",oderRouter)
 
 
 const PORT=process.env.PORT || 8000

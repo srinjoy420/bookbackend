@@ -114,7 +114,7 @@ export const getallReview=async(req,res)=>{
 export const getreviewbyID=async(req,res)=>{
   try {
     const {bookId}=req.params;
-    console.log(bookId);
+    // console.log(bookId);
     if(!bookId){
       throw new ApiError(404,"this field is required")
     }
@@ -130,6 +130,25 @@ export const getreviewbyID=async(req,res)=>{
   } catch (error) {
      console.log("cant fetch the boks", error);
           throw new ApiError(400, "sometheing went wrong")
+    
+  }
+}
+export const deletereview=async(req,res)=>{
+  try {
+    const {id}=req.params
+    console.log(id);
+    
+    if(!id){
+      throw new ApiError(400,"the id is missing")
+    }
+    const review=await Review.findByIdAndDelete(id)
+     return res
+      .status(201)
+      .json(new ApiResponse(201, review, "succesfully delete the book"));
+  } catch (error) {
+     console.log("cant fetch the boks", error);
+          throw new ApiError(400, "sometheing went wrong")
+    
     
   }
 }
