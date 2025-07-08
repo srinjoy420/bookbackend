@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { forgotpassword, loginUser, logoutUser, registerUser, resendEmailVerification, resetpassword, verifyUser } from "../controller/auth.controller.js";
+import { forgotpassword, loginUser, logoutUser, refreshacessToken, registerUser, resendEmailVerification, resetpassword, verifyUser } from "../controller/auth.controller.js";
 import {isLoggedin} from "../middleware/auth.middleware.js"
 
 const router = Router();
@@ -12,6 +12,7 @@ router.get("/logout", isLoggedin,logoutUser);
 router.post("/forgotpassword", forgotpassword);
 router.post("/resendemailVarification", resendEmailVerification);
 router.post("/resetpassword", resetpassword);
+router.post("/refreshacessToken", refreshacessToken);
 
 
 export default router;

@@ -7,7 +7,7 @@ dotenv.config()
 export const isLoggedin = async (req, res, next) => {
     try {
         console.log(req.cookies);
-        const token = req.cookies?.generateAcessToken;
+        const token = req.cookies?.AcessToken;
         console.log("token found ", token ? "YES" : "NO");
         if (!token) {
             throw new ApiError(401, "no token found ");

@@ -3,11 +3,37 @@ import User from "../model/user.model.js";
 import { ApiResponse } from "../utils/api-Response.js";
 import { ApiError } from "../utils/Api-error.js"
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
 
 import nodemailer from "nodemailer"
 import { sendmail, emailVerificationMailgenContent, forgotPasswordMailgenContent } from "../utils/mail.js"
 
-const userIgnore="-password -refreshToken -emailverificationtoken -emaiverificationexpiry -forgotpasswordtoken -forgotpasswordExpiry"
+const userIgnore = "-password -refreshToken -emailverificationtoken -emaiverificationexpiry -forgotpasswordtoken -forgotpasswordExpiry"
+dotenv.config()
+
+const generateAccessAndRefreshToken = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new ApiError("User not found", 400);
+    }
+
+    const accessToken = user.generateAcessToken(); // check spelling!
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    console.error("Generate Access and Refresh Token Error: ", error);
+    throw new ApiError("Internal Server Down", 500);
+  }
+};
+
 
 
 export const registerUser = async (req, res) => {
@@ -60,13 +86,18 @@ export const registerUser = async (req, res) => {
       mailGenContent: mailContent,
     });
     // generate acces token
-    const generateAcessToken = await user.generateAcessToken();
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    )
+
+    user.refreshToken = refreshToken;
+    await user.save();
     const cookieOptions = {
       httpOnly: true,
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     }
-    res.cookie("generateAcessToken", generateAcessToken, cookieOptions)
+    res.cookie("AcessToken", accessToken, cookieOptions)
 
 
 
@@ -74,7 +105,8 @@ export const registerUser = async (req, res) => {
     res.status(201).json({
       message: "User created successfully",
       success: true,
-      generateAcessToken,
+      accessToken
+      ,
       user: {
         id: user._id,
         firstname: user.firstname,
@@ -106,17 +138,22 @@ export const loginUser = async (req, res) => {
       throw new ApiError(404, "password not match")
     }
     //generate acess token
-    const generateAcessToken = await user.generateAcessToken();
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    )
+
+
     const cookieOptions = {
       httpOnly: true,
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     }
-    res.cookie("generateAcessToken", generateAcessToken, cookieOptions)
+    res.cookie("AcessToken", accessToken, cookieOptions)
+    res.cookie("RefreshToken", refreshToken, cookieOptions)
     res.status(200).json({
       success: true,
       message: "loginsuccesfully",
-      generateAcessToken,
+      accessToken,
       user: {
         id: user._id,
         name: user.firstname,
@@ -169,7 +206,8 @@ export const logoutUser = async (req, res) => {
       path: "/",
       expires: new Date(0),
     }
-    res.cookie("generateAcessToken", "", cookieOptions)
+    res.cookie("AcessToken", "", cookieOptions)
+    res.cookie("RefreshToken", '', cookieOptions)
     res.status(200).json({
       success: true,
       message: "loggedout succesfully"
@@ -260,14 +298,14 @@ export const resetpassword = async (req, res) => {
   try {
     const { token } = req.query;
     console.log(token);
-    
-    const {  newpassword } = req.body;
-    if (!token  || !newpassword) {
+
+    const { newpassword } = req.body;
+    if (!token || !newpassword) {
       throw new ApiError(400, "the email and new password is neede")
     }
     const hasedToken = crypto.createHash("sha256").update(token).digest("hex")
     const user = await User.findOne({
-      
+
       forgotpasswordtoken: hasedToken,
       forgotpasswordExpiry: { $gt: Date.now() }
     }).select("-password")
@@ -282,12 +320,57 @@ export const resetpassword = async (req, res) => {
     user.forgotpasswordExpiry = undefined;
     await user.save();
 
-    res.status(200).json(new ApiResponse(200,"reset password succesfully"))
+    res.status(200).json(new ApiResponse(200, "reset password succesfully"))
   } catch (error) {
-    console.log("reset has a problem",error);
-    throw new ApiError(400,"something went wrong")
-    
+    console.log("reset has a problem", error);
+    throw new ApiError(400, "something went wrong")
+
 
   }
+
+}
+export const refreshacessToken = async (req, res) => {
+  try {
+    const incomingToken = req.cookies?.RefreshToken
+    if (!refreshacessToken) {
+      throw new ApiError(401, "token not found")
+    }
+    const decode = jwt.verify(incomingToken, process.env.TOKEN_SECRET)
+    console.log("decoded token", decode);
+    const user = await User.findById(decode._id)
+    if (!user) {
+      throw new ApiError(401, "invalid refreshToken")
+    }
+    if (incomingToken !== user?.refreshToken) {
+      throw new ApiError(400, "invalid credentials")
+
+    }
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    }
+    const { accessToken,newrefreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    )
+    res.cookie("AcessToken", accessToken, cookieOptions)
+    res.cookie("RefreshToken", newrefreshToken, cookieOptions)
+    res.status(200).json({
+      success: true,
+      message: "acessToken refreshed",
+      accessToken,
+      refreshToken:newrefreshToken
+     
+    })
+     
+    
+  } catch (error) {
+     console.log("problem in refresing acesstoken", error);
+    throw new ApiError(400, "something went wrong")
+
+
+  }
+
+
 
 }

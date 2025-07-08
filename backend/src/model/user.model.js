@@ -99,7 +99,7 @@ userSchema.methods.generateAcessToken=function(){
             role:this.role
         },
         process.env.TOKEN_SECRET,
-        {expiresIn:process.env.TOKEN_EXPIRY}
+        {expiresIn:"7d"}
     )
 }
 //generate refreshToken
