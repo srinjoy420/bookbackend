@@ -112,7 +112,7 @@ export const registerUser = async (req, res) => {
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
-        avatar: user.avatar,
+        
         role: user.role
       },
     });

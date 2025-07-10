@@ -6,13 +6,20 @@ import {AvalibleUserRoles} from "../utils/constains.js";
 import dotenv from "dotenv";
 dotenv.config();
 const userSchema = new Schema({
-    avatar: {
-        type: String,
-
+    avatar:{
+        type:{
+            url:String,
+            localpath:String
+        },
+        default:{
+            url:`https://placehold.co/600x400`,
+            localpath:""
+        }
+        
     },
     firstname: {
         type: String,
-        require: true,
+        required: true,
         lowercase: true,
         trim: true,
         index: true
@@ -67,14 +74,7 @@ const userSchema = new Schema({
 
 
 }, { timestamps: true })
-userSchema.pre("save",function(next){
-    if(this.firstname && this.lastname){
-        const firstInitian=this.firstname.trim().charAt(0).toUpperCase();
-        const lastnameinitial=this.lastname.trim().charAt(0).toUpperCase();
-        this.avatar=`${firstInitian}${lastnameinitial}`
-    }
-    next();
-})
+
 
 //hased passwoed
 userSchema.pre("save", async function (next) {
