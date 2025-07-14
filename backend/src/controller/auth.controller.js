@@ -5,6 +5,7 @@ import { ApiError } from "../utils/Api-error.js"
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { otpsend } from "../utils/twilo.js"
 
 
 import nodemailer from "nodemailer"
@@ -112,7 +113,7 @@ export const registerUser = async (req, res) => {
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
-        
+
         role: user.role
       },
     });
@@ -169,6 +170,56 @@ export const loginUser = async (req, res) => {
 
   }
 
+
+}
+export const sendOtp = async (req, res) => {
+  try {
+    const { email, mobile } = req.body;
+
+    if (!email || !mobile || !/^\+\d{10,15}$/.test(mobile)) {
+      throw new ApiError(401, "please fill a valid mobile number or full email")
+    }
+    const user = await User.findOne({ email })
+    if (!user) {
+      throw new ApiError(401, "cant find the user please register first")
+
+
+    }
+    user.mobile = mobile
+    await user.save();
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    const sent = await otpsend(mobile, otp)
+    user.OTP = otp;
+    user.otpexpiry = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+    const cookieOptions={
+      httpOnly:true,
+      secure:true,
+      maxAge:10*60*1000
+    }
+    if (!sent) {
+      return res.status(500).json(new ApiResponse(500, {}, "Failed to send OTP"));
+
+    }
+    res.cookie("otpEmail",user.email,cookieOptions)
+    return res.status(200).json(new ApiResponse(200, { mobile }, "succesfully send otp"));
+
+
+  } catch (error) {
+    console.log("cant send otp", error);
+    throw new ApiError(400, "please try again later")
+
+
+  }
+
+}
+export const verifyOtp = (req, res) => {
+  const {otp}=req.body;
+  if(!otp){
+    throw new ApiError(401)
+  }
 
 }
 export const verifyUser = async (req, res) => {
@@ -350,7 +401,7 @@ export const refreshacessToken = async (req, res) => {
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     }
-    const { accessToken,newrefreshToken } = await generateAccessAndRefreshToken(
+    const { accessToken, newrefreshToken } = await generateAccessAndRefreshToken(
       user._id
     )
     res.cookie("AcessToken", accessToken, cookieOptions)
@@ -359,13 +410,13 @@ export const refreshacessToken = async (req, res) => {
       success: true,
       message: "acessToken refreshed",
       accessToken,
-      refreshToken:newrefreshToken
-     
+      refreshToken: newrefreshToken
+
     })
-     
-    
+
+
   } catch (error) {
-     console.log("problem in refresing acesstoken", error);
+    console.log("problem in refresing acesstoken", error);
     throw new ApiError(400, "something went wrong")
 
 

@@ -13,6 +13,7 @@ router.post("/forgotpassword", forgotpassword);
 router.post("/resendemailVarification", resendEmailVerification);
 router.post("/resetpassword", resetpassword);
 router.post("/refreshacessToken", refreshacessToken);
+//otp routes
 
 
 export default router;
