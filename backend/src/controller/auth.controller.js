@@ -22,7 +22,7 @@ const generateAccessAndRefreshToken = async (userId) => {
       throw new ApiError("User not found", 400);
     }
 
-    const accessToken = user.generateAcessToken(); // check spelling!
+    const accessToken = user.generateAcessToken();
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
@@ -189,21 +189,21 @@ export const sendOtp = async (req, res) => {
     await user.save();
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    
+
     const sent = await otpsend(mobile, otp)
     user.OTP = otp;
     user.otpexpiry = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
-    const cookieOptions={
-      httpOnly:true,
-      secure:true,
-      maxAge:10*60*1000
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      maxAge: 10 * 60 * 1000
     }
     if (!sent) {
       return res.status(500).json(new ApiResponse(500, {}, "Failed to send OTP"));
 
     }
-    res.cookie("otpEmail",user.email,cookieOptions)
+    res.cookie("otpEmail", user.email, cookieOptions)
     return res.status(200).json(new ApiResponse(200, { mobile }, "succesfully send otp"));
 
 
@@ -215,11 +215,59 @@ export const sendOtp = async (req, res) => {
   }
 
 }
-export const verifyOtp = (req, res) => {
-  const {otp}=req.body;
-  if(!otp){
-    throw new ApiError(401)
+export const verifyOtp = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const  email  = req.cookies?.otpEmail
+
+    if (!otp || !email) {
+      throw new ApiError(401, "please enter your otp before expiry")
+    }
+    const user = await User.findOne({ email })
+    if (!user) {
+      throw new ApiError(400, "user not found or please enter a valid otp")
+    }
+    if (user.otpexpiry < new Date()) {
+      user.OTP = undefined
+      user.otpexpiry = undefined
+      await user.save()
+      throw new ApiError(400, "your otp is expired please try later")
+    }
+    if (user.OTP !== otp) {
+      throw new ApiError(400, "your otp doesnot match please enter a valid otp")
+
+    }
+
+    user.OTP = undefined
+    user.otpexpiry = undefined;
+    await user.save()
+   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    )
+    user.refreshToken = refreshToken
+    await user.save({ validateBeforeSave: false })
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000
+    }
+     res.cookie("AcessToken", accessToken, cookieOptions)
+    res.cookie("RefreshToken", refreshToken, cookieOptions)
+    return res.status(200).json(new ApiResponse(200, {
+      accessToken,
+      id:user._id,
+      name:user.firstname,
+      email:user.email,
+      role:user.role
+    },"user verified and login succesfully"));
+  } catch (error) {
+    console.log("otp variladion eror", error);
+    throw new ApiError(400, "something went wrong please after sometime")
+
+
+
   }
+
 
 }
 export const verifyUser = async (req, res) => {
@@ -383,7 +431,7 @@ export const resetpassword = async (req, res) => {
 export const refreshacessToken = async (req, res) => {
   try {
     const incomingToken = req.cookies?.RefreshToken
-    if (!refreshacessToken) {
+    if (!incomingToken) {
       throw new ApiError(401, "token not found")
     }
     const decode = jwt.verify(incomingToken, process.env.TOKEN_SECRET)
