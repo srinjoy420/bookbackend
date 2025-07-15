@@ -20,15 +20,28 @@ export const sendmail = async (options) => {
     var emailBody = mailGenerator.generate(options.mailGenContent);
 
     //nodemailer configuration
-    const transporter = nodemailer.createTransport({
-        host: process.env.MAILTRAP_HOST,
-        port: process.env.MAILTRAP_PORT,
+    // const transporter = nodemailer.createTransport({
+    //     host: process.env.MAILTRAP_HOST,
+    //     port: process.env.MAILTRAP_PORT,
+    //     secure: false, // true for port 465, false for other ports
+    //     auth: {
+    //         user: process.env.MAILTRAP_USER, // generated ethereal user
+    //         pass: process.env.MAILTRAP_PASS, // generated ethereal password
+    //     },
+    // });
+    
+
+    //personal production ready
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
         secure: false, // true for port 465, false for other ports
         auth: {
-            user: process.env.MAILTRAP_USER, // generated ethereal user
-            pass: process.env.MAILTRAP_PASS, // generated ethereal password
+            user: process.env.EMAIL_USER, 
+            pass: process.env.EMAIL_PASS, 
         },
     });
+
 
     const mail = {
 

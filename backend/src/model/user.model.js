@@ -46,10 +46,9 @@ const userSchema = new Schema({
     },
     mobile: {
         type: String,
-        required: true,
+       
         unique: true,
-        match: [/^\d{10}$/, "Please provide a valid 10-digit phone number"],
-
+       
     },
     OTP: {
         type: String,

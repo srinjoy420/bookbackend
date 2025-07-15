@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { forgotpassword, loginUser, logoutUser, refreshacessToken, registerUser, resendEmailVerification, resetpassword, verifyUser } from "../controller/auth.controller.js";
+import { forgotpassword, loginUser, logoutUser, refreshacessToken, registerUser, resendEmailVerification, resetpassword, sendOtp, verifyOtp, verifyUser } from "../controller/auth.controller.js";
 import {isLoggedin} from "../middleware/auth.middleware.js"
 
 const router = Router();
@@ -14,6 +14,8 @@ router.post("/resendemailVarification", resendEmailVerification);
 router.post("/resetpassword", resetpassword);
 router.post("/refreshacessToken", refreshacessToken);
 //otp routes
+router.post("/sendotp",isLoggedin, sendOtp);
+router.post("/loginwithOtp",isLoggedin, verifyOtp);
 
 
 export default router;

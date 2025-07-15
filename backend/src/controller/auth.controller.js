@@ -176,7 +176,7 @@ export const sendOtp = async (req, res) => {
   try {
     const { email, mobile } = req.body;
 
-    if (!email || !mobile || !/^\+\d{10,15}$/.test(mobile)) {
+    if (!email || !mobile ) {
       throw new ApiError(401, "please fill a valid mobile number or full email")
     }
     const user = await User.findOne({ email })
