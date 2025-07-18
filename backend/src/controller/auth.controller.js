@@ -78,7 +78,7 @@ export const registerUser = async (req, res) => {
     const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${token}&email=${user.email}`;
 
     // Generate email content
-    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl);
+    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl,token);
 
     // Send the email
     await sendmail({
@@ -339,7 +339,7 @@ export const resendEmailVerification = async (req, res) => {
     await user.save();
     // send mail to tthe user
     const verificationUrl = `${process.env.BASE_URL}/resendEmailverification?token=${token}&email=${user.email}`
-    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl);
+    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl,token);
 
     // Send the email
     await sendmail({
@@ -472,4 +472,54 @@ export const refreshacessToken = async (req, res) => {
 
 
 
+}
+export const deleteAccount=async(req,res)=>{
+  try {
+    const userId=req.user._id;
+    const user=await User.findByIdAndDelete(userId)
+    if(!user){
+      throw new ApiError(404,"user not found")
+    }
+    res.clearCookie("AcessToken");
+    res.clearCookie("RefreshToken");
+    res.status(200).json({
+      success: true,
+      message: "account deleted succesfully",
+   
+
+    })
+  } catch (error) {
+     console.log("problem in deleting aacount", error);
+    throw new ApiError(400, "something went wrong")
+    
+  }
+}
+export const currentUser=async(req,res)=>{
+  try {
+     const userId=req.user._id;
+     const user=await User.findById(userId)
+     if(!user){
+      throw new ApiError(401,"cant find the user or the user is not loggedin")
+     }
+     res.status(200).json({
+      success: true,
+      message: "account fetched succesfully",
+      user:{
+        id: user._id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+
+        role: user.role
+      }
+   
+
+    })
+
+  } catch (error) {
+    console.log(("the problem to fetched the user",error));
+    
+    throw new ApiError(400,"cant find the user please try again later")
+    
+  }
 }

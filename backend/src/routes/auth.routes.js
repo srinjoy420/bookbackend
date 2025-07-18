@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { forgotpassword, loginUser, logoutUser, refreshacessToken, registerUser, resendEmailVerification, resetpassword, sendOtp, verifyOtp, verifyUser } from "../controller/auth.controller.js";
+import { currentUser, deleteAccount, forgotpassword, loginUser, logoutUser, refreshacessToken, registerUser, resendEmailVerification, resetpassword, sendOtp, verifyOtp, verifyUser } from "../controller/auth.controller.js";
 import {isLoggedin} from "../middleware/auth.middleware.js"
 
 const router = Router();
@@ -16,6 +16,10 @@ router.post("/refreshacessToken", refreshacessToken);
 //otp routes
 router.post("/sendotp",isLoggedin, sendOtp);
 router.post("/loginwithOtp",isLoggedin, verifyOtp);
+//delete account
+router.delete("/deleteaccount",isLoggedin, deleteAccount);
+//current user
+router.get("/aboutuser",isLoggedin,currentUser)
 
 
 export default router;

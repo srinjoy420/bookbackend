@@ -66,7 +66,7 @@ export const sendmail = async (options) => {
 
 //this method send mail
 
-export const emailVerificationMailgenContent = (username, verificationUrl) => {
+export const emailVerificationMailgenContent = (username, verificationUrl,token) => {
     return {
         body: {
             name: username,
@@ -79,7 +79,7 @@ export const emailVerificationMailgenContent = (username, verificationUrl) => {
                     link: verificationUrl
                 }
             },
-            outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
+            outro: `If the button doesn't work, you can copy and paste this token in the app:\n\n**${token}**\n\nNeed help or have questions? Just reply to this email — we'd love to help.`
         }
     }
 }
