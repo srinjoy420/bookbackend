@@ -3,6 +3,8 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import connectDB from "./db/db.js"
 dotenv.config()
+import cors from "cors"
+
 
 //imports the routes
 import authrouter from "./routes/auth.routes.js"//auth router
@@ -14,6 +16,16 @@ import {cleanOtp} from "./utils/Cornjob.js"
 const app = express()
 app.use(cookieParser())
 app.use(express.json())
+//setup cors
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "DELETE", "OPTIONS", "PUT"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+    exposedHeaders: ["Set-Cookie", "*"],
+  })
+);
 // use the routes
 app.use("/api/v1/auth",authrouter) //auth
 app.use("/api/v1/book",bookrouter)
