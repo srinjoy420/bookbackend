@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 import {
   Card,
   CardAction,
@@ -15,10 +16,44 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import logo from "../assets/Read.png"
+import { authDataContext } from '../context/authContext';
 
 const Login = () => {
-  const [show,setShow]=useState(false)
+  const [show, setShow] = useState(false)
+  const { serverUrl } = useContext(authDataContext)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate()
+
+  const handellogin = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+    try {
+      const result=await axios.post(serverUrl + '/api/v1/auth/login',{
+        email,password
+      },{withCredentials:true})
+      if (result.data.success) {
+        navigate("/")
+      }
+      console.log(result);
+
+    } catch (error) {
+      console.log(error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Signup failed due to an unknown error";
+      setError(message);
+    }
+    finally {
+      setLoading(false)
+    }
+
+  }
   return (
     <div className="min-h-screen flex items-start justify-center pt-20 px-4 bg-gray-50">
       <Card className="w-full max-w-sm shadow-lg">
@@ -38,44 +73,51 @@ const Login = () => {
           <CardTitle className="text-center">enter your email and password</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Your form elements go here */}
-          {/* emal */}
-          <div className="flex flex-col gap-6">
+          <form onSubmit={handellogin}>
+            {/* Your form elements go here */}
+            {/* emal */}
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  required
+                />
+              </div>
+
+
+            </div>
+            {/* pass */}
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-              />
-            </div>
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <a
+                  href="#"
+                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                >
+                  Forgot your password?
+                </a>
+              </div>
+              <div className="relative">
+                <Input id="password" type={show ? "text" : "password"} onChange={(e) => setPassword(e.target.value)} value={password} required className="pr-10" />
 
+                {/* Eye icon */}
 
-          </div>
-          {/* pass */}
-          <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
-              <a
-                href="#"
-                className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-              >
-                Forgot your password?
-              </a>
+              </div>
             </div>
-            <div className="relative">
-              <Input id="password" type={show?"text":"password"} required className="pr-10" />
-
-              {/* Eye icon */}
-              {!show &&<FaRegEye className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" onClick={()=>setShow(prev=>!prev)} />}
-              {show &&<FaRegEyeSlash className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" onClick={()=>setShow(prev=>!prev)} />}
-            </div>
-          </div>
-          {/* login button */}
-          <Button type="submit" className="w-full" >
-            login
-          </Button>
+            {/* login button */}
+            <Button type="submit" className="w-full" disabled={loading} >
+              {loading ? "login ..." : "login Up"}
+            </Button>
+            {/* Error Message */}
+            {error && (
+              <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+            )}
+          </form>
         </CardContent>
         <div className="px-6 pb-4">
           <Button variant="link" className="w-full" onClick={() => navigate("/singup")}>

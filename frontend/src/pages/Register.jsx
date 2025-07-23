@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import { useNavigate } from "react-router-dom";
+import axios from "axios"
 import {
   Card,
   CardAction,
@@ -14,11 +15,80 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import logo from "../assets/Read.png"
 import google from "../assets/google.jpg"
+import { FaRegEye } from "react-icons/fa";
+import { FaRegEyeSlash } from "react-icons/fa";
+import { authDataContext } from '../context/authContext';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, provider } from '../../utils/Firebase.js';
 
 
 
 export const Register = () => {
+  const [show, setShow] = useState(false)
+  const { serverUrl } = useContext(authDataContext)
+  const [firstname, setFirstName] = useState("")
+  const [lastname, setLastName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate()
+
+  const handelSingup = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError("")
+    try {
+      const result = await axios.post(serverUrl + '/api/v1/auth/register', {
+        firstname, lastname, email, password
+      }, { withCredentials: true })
+      if (result.data.success) {
+        navigate("/")
+      }
+      console.log(result);
+
+
+    } catch (error) {
+      console.log(error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Signup failed due to an unknown error";
+      setError(message);
+
+
+    }
+    finally{
+      setLoading(false)
+    }
+
+  }
+  // for firebase googlelogin
+  const googleLogin= async()=>{
+    try {
+      const res=await signInWithPopup(auth,provider) 
+      console.log(res);
+      const user=res.user
+      let firstname=user.displayName
+      let lastname=user.displayName
+      let email=user.email
+
+      const result=await axios.post(serverUrl+'/api/v1/auth/googlelogin',{
+        firstname,lastname,email
+      },{withCredentials:true})
+      if (result.data.success) {
+        navigate("/")
+      }
+      console.log(result);
+      
+    } catch (error) {
+      console.log(error);
+      
+      
+    }
+
+  }
   return (
 
     <div className="min-h-screen flex items-start justify-center pt-20 px-4 bg-gray-50">
@@ -46,7 +116,7 @@ export const Register = () => {
         <CardContent>
           {/* Your form elements go here */}
           {/* firstname */}
-          <form>
+          <form onSubmit={handelSingup}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="firstname">Firstname</Label>
@@ -54,6 +124,8 @@ export const Register = () => {
                   id="firstname"
                   type="text"
                   placeholder="srinjoy"
+                  onChange={(e) => setFirstName(e.target.value)}
+                  value={firstname}
                   required
                 />
               </div>
@@ -66,6 +138,8 @@ export const Register = () => {
                   id="lastname"
                   type="text"
                   placeholder="Goswami"
+                  onChange={(e) => setLastName(e.target.value)}
+                  value={lastname}
                   required
                 />
               </div>
@@ -77,6 +151,8 @@ export const Register = () => {
                     id="email"
                     type="email"
                     placeholder="m@example.com"
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
                     required
                   />
                 </div>
@@ -94,17 +170,26 @@ export const Register = () => {
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <div className="relative">
+                  <Input id="password" type={show ? "text" : "password"} onChange={(e) => setPassword(e.target.value)} value={password} required className="pr-10" />
+
+                  {/* Eye icon */}
+              
+                </div>
               </div>
               {/* button submit */}
-               <Button type="submit" className="w-full" >
-               Create Account
-            </Button>
+              <Button type="submit" className="w-full" disabled={loading} >
+                {loading ? "Signing Up..." : "Sign Up"}
+              </Button>
+              {/* Error Message */}
+            {error && (
+              <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+            )}
 
             </div>
             {/* login with google */}
-            <Card className='googlelogin  shadow-lg flex justify-center align-bottom w-full h-20'>
-              <div className="google flex items-center justify-center gap-4 mt-6">
+            
+              <div className="google flex items-center justify-center gap-4 mt-6"onClick={googleLogin} >
                 <img
                   src={google}
                   alt="ReadWrite Logo"
@@ -117,7 +202,7 @@ export const Register = () => {
               </div>
 
 
-            </Card>
+            
 
 
           </form>

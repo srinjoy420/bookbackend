@@ -39,8 +39,8 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 export const registerUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password, role } = req.body;
-    console.log("role", role);
+    const { firstname, lastname, email, password } = req.body;
+
 
 
     // 1. Validate fields
@@ -67,7 +67,7 @@ export const registerUser = async (req, res) => {
       lastname,
       email,
       password,
-      role
+
     });
     // save the emailverification token 
     const token = await crypto.randomBytes(32).toString("hex");
@@ -78,7 +78,7 @@ export const registerUser = async (req, res) => {
     const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${token}&email=${user.email}`;
 
     // Generate email content
-    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl,token);
+    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl, token);
 
     // Send the email
     await sendmail({
@@ -114,7 +114,7 @@ export const registerUser = async (req, res) => {
         lastname: user.lastname,
         email: user.email,
 
-        role: user.role
+
       },
     });
   } catch (error) {
@@ -159,7 +159,7 @@ export const loginUser = async (req, res) => {
         id: user._id,
         name: user.firstname,
         email: user.email,
-        role: user.role
+
 
       }
     })
@@ -176,7 +176,7 @@ export const sendOtp = async (req, res) => {
   try {
     const { email, mobile } = req.body;
 
-    if (!email || !mobile ) {
+    if (!email || !mobile) {
       throw new ApiError(401, "please fill a valid mobile number or full email")
     }
     const user = await User.findOne({ email })
@@ -218,7 +218,7 @@ export const sendOtp = async (req, res) => {
 export const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
-    const  email  = req.cookies?.otpEmail
+    const email = req.cookies?.otpEmail
 
     if (!otp || !email) {
       throw new ApiError(401, "please enter your otp before expiry")
@@ -241,7 +241,7 @@ export const verifyOtp = async (req, res) => {
     user.OTP = undefined
     user.otpexpiry = undefined;
     await user.save()
-   const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id
     )
     user.refreshToken = refreshToken
@@ -251,15 +251,15 @@ export const verifyOtp = async (req, res) => {
       secure: true,
       maxAge: 24 * 60 * 60 * 1000
     }
-     res.cookie("AcessToken", accessToken, cookieOptions)
+    res.cookie("AcessToken", accessToken, cookieOptions)
     res.cookie("RefreshToken", refreshToken, cookieOptions)
     return res.status(200).json(new ApiResponse(200, {
       accessToken,
-      id:user._id,
-      name:user.firstname,
-      email:user.email,
-      role:user.role
-    },"user verified and login succesfully"));
+      id: user._id,
+      name: user.firstname,
+      email: user.email,
+      role: user.role
+    }, "user verified and login succesfully"));
   } catch (error) {
     console.log("otp variladion eror", error);
     throw new ApiError(400, "something went wrong please after sometime")
@@ -339,7 +339,7 @@ export const resendEmailVerification = async (req, res) => {
     await user.save();
     // send mail to tthe user
     const verificationUrl = `${process.env.BASE_URL}/resendEmailverification?token=${token}&email=${user.email}`
-    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl,token);
+    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl, token);
 
     // Send the email
     await sendmail({
@@ -473,38 +473,38 @@ export const refreshacessToken = async (req, res) => {
 
 
 }
-export const deleteAccount=async(req,res)=>{
+export const deleteAccount = async (req, res) => {
   try {
-    const userId=req.user._id;
-    const user=await User.findByIdAndDelete(userId)
-    if(!user){
-      throw new ApiError(404,"user not found")
+    const userId = req.user._id;
+    const user = await User.findByIdAndDelete(userId)
+    if (!user) {
+      throw new ApiError(404, "user not found")
     }
     res.clearCookie("AcessToken");
     res.clearCookie("RefreshToken");
     res.status(200).json({
       success: true,
       message: "account deleted succesfully",
-   
+
 
     })
   } catch (error) {
-     console.log("problem in deleting aacount", error);
+    console.log("problem in deleting aacount", error);
     throw new ApiError(400, "something went wrong")
-    
+
   }
 }
-export const currentUser=async(req,res)=>{
+export const currentUser = async (req, res) => {
   try {
-     const userId=req.user._id;
-     const user=await User.findById(userId)
-     if(!user){
-      throw new ApiError(401,"cant find the user or the user is not loggedin")
-     }
-     res.status(200).json({
+    const userId = req.user._id;
+    const user = await User.findById(userId)
+    if (!user) {
+      throw new ApiError(401, "cant find the user or the user is not loggedin")
+    }
+    res.status(200).json({
       success: true,
       message: "account fetched succesfully",
-      user:{
+      user: {
         id: user._id,
         firstname: user.firstname,
         lastname: user.lastname,
@@ -512,14 +512,62 @@ export const currentUser=async(req,res)=>{
 
         role: user.role
       }
-   
+
 
     })
 
   } catch (error) {
-    console.log(("the problem to fetched the user",error));
-    
-    throw new ApiError(400,"cant find the user please try again later")
-    
+    console.log(("the problem to fetched the user", error));
+
+    throw new ApiError(400, "cant find the user please try again later")
+
+  }
+}
+export const googleLogin = async (req, res) => {
+  try {
+    const { firstname, lastname, email } = req.body;
+    if (!firstname || !lastname || !email) {
+      throw new ApiError(400, "please provide all the fields");
+
+    }
+    let user = await User.findOne({ email })
+    if (!user) {
+      user = await User.create({
+        firstname,
+        lastname,
+        email,
+        password: crypto.randomBytes(16).toString("hex")
+      })
+      
+    }
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    )
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    }
+    res.cookie("AcessToken", accessToken, cookieOptions)
+    res.cookie("RefreshToken", refreshToken, cookieOptions)
+    res.status(200).json({
+      success: true,
+      message: "loginsuccesfully",
+      accessToken,
+      user: {
+        id: user._id,
+        name: user.firstname,
+        email: user.email,
+
+
+      }
+    })
+
+  } catch (error) {
+    console.log("cant login using googlee", error);
+    throw new ApiError(400, "something went wrong please try after sometime")
+
+
   }
 }
