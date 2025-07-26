@@ -17,6 +17,9 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import logo from "../assets/Read.png"
 import { authDataContext } from '../context/authContext';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, provider } from '../../utils/Firebase.js';
+import google from "../assets/google.jpg"
 
 const Login = () => {
   const [show, setShow] = useState(false)
@@ -33,9 +36,9 @@ const Login = () => {
     setLoading(true)
     setError("")
     try {
-      const result=await axios.post(serverUrl + '/api/v1/auth/login',{
-        email,password
-      },{withCredentials:true})
+      const result = await axios.post(serverUrl + '/api/v1/auth/login', {
+        email, password
+      }, { withCredentials: true })
       if (result.data.success) {
         navigate("/")
       }
@@ -51,6 +54,31 @@ const Login = () => {
     }
     finally {
       setLoading(false)
+    }
+
+  }
+  // google login
+  const googleLogin=async(e)=>{
+    try {
+       const res=await signInWithPopup(auth,provider) 
+      console.log(res);
+      const user=res.user
+      let firstname=user.displayName
+      let lastname=user.displayName
+      let email=user.email
+
+      const result=await axios.post(serverUrl+'/api/v1/auth/googlelogin',{
+        firstname,lastname,email
+      },{withCredentials:true})
+      if (result.data.success) {
+        navigate("/")
+      }
+      console.log(result);
+      
+    } catch (error) {
+      console.log(error);
+      
+      
     }
 
   }
@@ -117,6 +145,19 @@ const Login = () => {
             {error && (
               <p className="text-red-500 text-sm text-center mt-2">{error}</p>
             )}
+
+            {/* login with google */}
+            <div className="google flex items-center justify-center gap-4 mt-6" onClick={googleLogin} >
+              <img
+                src={google}
+                alt="ReadWrite Logo"
+                className="w-16 h-10 object-contain"
+              />
+              {/* heading */}
+              <p className=" font-semibold text-gray-800">
+                Login using Google
+              </p>
+            </div>
           </form>
         </CardContent>
         <div className="px-6 pb-4">
