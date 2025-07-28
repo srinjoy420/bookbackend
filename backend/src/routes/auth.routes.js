@@ -7,7 +7,7 @@ const router = Router();
 // Register route
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.get("/verifyemail/:token",isLoggedin, verifyUser);
+router.get("/verifyemail", verifyUser);
 router.get("/logout", isLoggedin,logoutUser);
 router.post("/forgotpassword", forgotpassword);
 router.post("/resendemailVarification", resendEmailVerification);

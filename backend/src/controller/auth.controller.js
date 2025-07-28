@@ -75,7 +75,11 @@ export const registerUser = async (req, res) => {
     await user.save();
     //send mail to the user
     // Build your verification link (adjust frontend URL)
-    const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${token}&email=${user.email}`;
+    //  const verificationUrl = `${process.env.BASE_URl}/api/v1/auth/verify-email?token=${token}&email=${user.email}`;
+
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}&email=${user.email}`;
+
+
 
     // Generate email content
     const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl, token);
@@ -272,11 +276,15 @@ export const verifyOtp = async (req, res) => {
 }
 export const verifyUser = async (req, res) => {
   try {
-    const { token } = req.params;
+    const { token, email } = req.query;
     console.log(token);
-    const user = await User.findOne({ emailverificationtoken: token });
-    if (!user) {
-      throw new ApiError(404, "cant find the token");
+    console.log(email);
+
+    const user = await User.findOne({ email });
+    console.log(user);
+    
+    if (!user || user.emailverificationtoken !== token) {
+      throw new ApiError(404, "cant find the token and email");
     }
     user.isemailVerified = true;
     user.emailverificationtoken = undefined
@@ -338,7 +346,7 @@ export const resendEmailVerification = async (req, res) => {
     user.emailverificationtoken = token;
     await user.save();
     // send mail to tthe user
-    const verificationUrl = `${process.env.BASE_URL}/resendEmailverification?token=${token}&email=${user.email}`
+    const verificationUrl = `${process.env.FRONTEND_URl}/verify-email?token=${token}&email=${user.email}`
     const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl, token);
 
     // Send the email
@@ -373,7 +381,7 @@ export const forgotpassword = async (req, res) => {
     user.forgotpasswordExpiry = tokeExpiry;
     await user.save()
     //send mail to token to the user
-    const passwordResetUrl = `${process.env.BASE_URL}/resetpassword?token=${unHasedToken}&email=${user.email}`;
+    const passwordResetUrl = `${process.env.FRONTEND_URL}/resetpassword?token=${unHasedToken}&email=${user.email}`;
     const mailContent = forgotPasswordMailgenContent(`${user.firstname} ${user.lastname}`, passwordResetUrl);
     // Send the email
     await sendmail({
@@ -538,8 +546,26 @@ export const googleLogin = async (req, res) => {
         email,
         password: crypto.randomBytes(16).toString("hex")
       })
-      
+
     }
+    // send mail 
+    const token = await crypto.randomBytes(32).toString("hex");
+    user.emailverificationtoken = token;
+    await user.save();
+    //send mail to the user
+    // Build your verification link (adjust frontend URL)
+    const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${token}&email=${user.email}`;
+
+    // Generate email content
+    const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl, token);
+
+    // Send the email
+    await sendmail({
+      email: user.email,
+      subject: "Verify your email address",
+      mailGenContent: mailContent,
+    });
+
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id
     )

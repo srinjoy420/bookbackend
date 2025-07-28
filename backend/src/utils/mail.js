@@ -66,10 +66,10 @@ export const sendmail = async (options) => {
 
 //this method send mail
 
-export const emailVerificationMailgenContent = (username, verificationUrl,token) => {
+export const emailVerificationMailgenContent = (firstname, verificationUrl,token) => {
     return {
         body: {
-            name: username,
+            name: firstname,
             intro: 'Welcome to Bookbazar! we are veryexcited to have you on board.',
             action: {
                 instructions: 'To get started with Mailgen, please click here:',
@@ -79,7 +79,7 @@ export const emailVerificationMailgenContent = (username, verificationUrl,token)
                     link: verificationUrl
                 }
             },
-            outro: `If the button doesn't work, you can copy and paste this token in the app:\n\n**${token}**\n\nNeed help or have questions? Just reply to this email — we'd love to help.`
+            outro:`${process.env.BASE_URL}/api/v1/auth/verify-email?token=${token}&email=`
         }
     }
 }
