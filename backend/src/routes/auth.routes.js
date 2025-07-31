@@ -10,7 +10,7 @@ router.post("/login", loginUser);
 router.get("/verifyemail", verifyUser);
 router.get("/logout", isLoggedin,logoutUser);
 router.post("/forgotpassword", forgotpassword);
-router.post("/resendemailVarification", resendEmailVerification);
+router.post("/resendemailVerification", resendEmailVerification);
 router.post("/resetpassword", resetpassword);
 router.post("/refreshacessToken", refreshacessToken);
 //otp routes

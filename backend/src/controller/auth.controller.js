@@ -346,7 +346,7 @@ export const resendEmailVerification = async (req, res) => {
     user.emailverificationtoken = token;
     await user.save();
     // send mail to tthe user
-    const verificationUrl = `${process.env.FRONTEND_URl}/verify-email?token=${token}&email=${user.email}`
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}&email=${user.email}`
     const mailContent = emailVerificationMailgenContent(`${user.firstname} ${user.lastname}`, verificationUrl, token);
 
     // Send the email

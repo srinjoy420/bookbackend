@@ -10,6 +10,10 @@ import { Loadeer } from "./loader/Loadeer";
 import VerifyEmail from "./pages/VerifyEmail";
 import Forgotpass from "./pages/Forgotpass";
 import ResetPassword from "./pages/ResetPassword";
+import ResendEmail from "./pages/resendEmail";
+import SendMobile from "./pages/SendMobile";
+import VerifyOtp from "./pages/VerifyOtp";
+
  
 function App() {
   return (
@@ -21,6 +25,10 @@ function App() {
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/forgotpassword" element={<Forgotpass />} />
       <Route path="/resetpassword" element={<ResetPassword />} />
+      <Route path="/resendEmail" element={<ResendEmail />} />
+      <Route path="/sendotp" element={<SendMobile />} />
+      <Route path="/verifyotp" element={<VerifyOtp />} />
+      
       <Route path="*" element={<PagenotFound />} />
       
 

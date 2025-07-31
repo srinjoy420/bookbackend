@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { authDataContext } from '../context/authContext';
+import React, { useContext, useState } from 'react'
 import axios from 'axios';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     Card,
     CardAction,
@@ -15,32 +15,28 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import logo from "../assets/Read.png"
 
-const ResetPassword = () => {
-    const [searchParams] = useSearchParams();
-    const token = searchParams.get('token');
-    const email = searchParams.get('email');
-    const [newpassword, setNewpassword] = useState('')
+const ResendEmail = () => {
+    const [email, setEmail] = useState("")
+    const { serverUrl } = useContext(authDataContext)
     const [message, setMessage] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false);
-      const navigate = useNavigate()
-    const handelresetPassword = async (e) => {
+
+    const handelresendEmailtoken = async (e) => {
         e.preventDefault()
-        setMessage('')
+        setMessage("")
         setError("")
         setLoading(true)
         try {
-            const res = await axios.post(`http://localhost:8000/api/v1/auth/resetpassword?token=${token}&email=${email}`, {
-                newpassword
+            const { data } = await axios.post(serverUrl + "/api/v1/auth/resendemailVerification", {
+                email
             }, { withCredentials: true })
-            setMessage("password change succesfully")
-            if(res.data.success){
-                navigate("/login")
-            }
+            console.log(data);
+            
+            setMessage(data.message || "reset password link sent to your email")
         } catch (error) {
             console.log(error);
-            setMessage("set new password failed")
-
+            setError(error?.response?.data?.message || 'Something went wrong')
 
         }
         finally {
@@ -59,41 +55,46 @@ const ResetPassword = () => {
                         />
                         {/* heading */}
                         <h1 className="text-xl font-semibold text-center text-gray-800 mb-2">
-                            Reset password
+                            ResendEmail Verification
                         </h1>
 
                     </div>
                 </CardHeader>
                 <CardDescription className="text-center">
-                    Enter your new password
+                    Enter your email address
                 </CardDescription>
+                {/* contnt */}
+                {/* card container */}
                 <CardContent>
-                    <form onSubmit={handelresetPassword}>
+                    {message && <p className="text-green-600 text-center mb-2">{message}</p>}
+                    {error && <p className="text-red-600 text-center mb-2">{error}</p>}
+                    <form onSubmit={handelresendEmailtoken}>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="firstname">Email</Label>
                                 <Input
                                     id="firstname"
-                                    type="password"
-                                    placeholder="*****"
-                                    onChange={(e) => setNewpassword(e.target.value)}
-                                    value={newpassword}
+                                    type="text"
+                                    placeholder="srinjoy"
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={email}
                                     required
                                 />
                             </div>
-                            {/* button */}
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
-                            >
-                                {loading ? "changing ..." : "change password"}
-                            </Button>
-                            {error && (
-                                <p className="text-red-500 text-sm text-center mt-2">{error}</p>
-                            )}
 
                         </div>
+                        {/* button */}
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md"
+                        >
+                            {loading ? "sending ..." : "resendEmail"}
+                        </Button>
+                        {error && (
+                            <p className="text-red-500 text-sm text-center mt-2">{error}</p>
+                        )}
+
                     </form>
                 </CardContent>
             </Card>
@@ -102,4 +103,4 @@ const ResetPassword = () => {
     )
 }
 
-export default ResetPassword
+export default ResendEmail
