@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ResendEmail from "./pages/resendEmail";
 import SendMobile from "./pages/SendMobile";
 import VerifyOtp from "./pages/VerifyOtp";
+import Aboutme from "./pages/Aboutme";
 
  
 function App() {
@@ -28,6 +29,7 @@ function App() {
       <Route path="/resendEmail" element={<ResendEmail />} />
       <Route path="/sendotp" element={<SendMobile />} />
       <Route path="/verifyotp" element={<VerifyOtp />} />
+      <Route path="/me" element={<Aboutme />} />
       
       <Route path="*" element={<PagenotFound />} />
       

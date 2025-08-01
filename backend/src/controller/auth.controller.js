@@ -40,6 +40,10 @@ const generateAccessAndRefreshToken = async (userId) => {
 export const registerUser = async (req, res) => {
   try {
     const { firstname, lastname, email, password } = req.body;
+    const{role}=req.body;
+    if(!role){
+      role="customer"
+    }
 
 
 
@@ -67,6 +71,7 @@ export const registerUser = async (req, res) => {
       lastname,
       email,
       password,
+      role
 
     });
     // save the emailverification token 
@@ -117,6 +122,7 @@ export const registerUser = async (req, res) => {
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
+        role:user.role
 
 
       },
@@ -517,6 +523,7 @@ export const currentUser = async (req, res) => {
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
+       
 
         role: user.role
       }
