@@ -10,7 +10,7 @@ export const AddBook = async (req, res) => {
 
         }
 
-        const ExistBook = await Book.findOne({ name })
+        const ExistBook = await Book.findOne({ name: name.toLowerCase().trim()  })
         if (ExistBook) {
             throw new ApiError(409, "book exist already")
 
@@ -22,11 +22,7 @@ export const AddBook = async (req, res) => {
             author, published,
             price,
             slno,
-            bookAddedBy: {
-                id: req.user._id,
-                name: `${req.user.firstname} ${req.user.lastname}`
-            },
-
+            bookAddedBy: req.user._id,
         })
         return res.status(200).json(new ApiResponse(200, book, "Book added successfully"));
 
@@ -43,7 +39,7 @@ export const AddBook = async (req, res) => {
 }
 export const getAllbooks = async (req, res) => {
     try {
-        const books = await Book.find();
+        const books = await Book.find().populate("bookAddedBy", "firstname lastname email");
         if (books.length === 0) {
             throw new ApiError(404, "there is no books")
         }
@@ -64,7 +60,7 @@ export const getbookbyName = async (req, res) => {
 
 
         }
-        const book = await Book.findOne({ name: name })
+        const book = await Book.findOne({ name: name.toLowerCase().trim() }).populate("bookAddedBy", "firstname lastname email");
         return res.status(200).json(new ApiResponse(200, book, "here is your book"))
     } catch (error) {
         console.log("cant fetch the boks", error);
@@ -80,7 +76,7 @@ export const getBookbyid = async (req, res) => {
         if (!id) {
             throw new ApiError(404, "user nott found please try again")
         }
-        const book = await Book.findById(id);
+        const book = await Book.findById(id).populate("bookAddedBy", "firstname lastname email");
         if (!book) {
             throw new ApiError(404, "we found no books such this id")
         }
@@ -124,42 +120,28 @@ export const updateBook = async (req, res) => {
     }
 
 }
-export const updateBookbyname=async(req,res)=>{
+export const updateBookByName = async (req, res) => {
     try {
-       const { name, author, price, published, slno } = req.body;
-
-if (!name || !author || !price || !published || !slno) {
-  throw new ApiError(400, "All fields are required");
-}
-
-const updatedBook = await Book.findOneAndUpdate(
-  {
-    name: name.toLowerCase().trim(),
-    
-  },
-  {
-    author,
-    price,
-    published,
-    slno
-  },
-  {
-    new: true,
-    runValidators: true
-  }
-);
- return res.status(200).json(new ApiResponse(200, updateBook, "Book update successfully"));
-
-
+      const { name, author, price, published, slno } = req.body;
+  
+      if (!name || !author || !price || !published || !slno) {
+        throw new ApiError(400, "All fields are required");
+      }
+  
+      const updatedBook = await Book.findOneAndUpdate(
+        { name: name.toLowerCase().trim() },
+        { author, price, published, slno },
+        { new: true, runValidators: true }
+      );
+  
+      if (!updatedBook) throw new ApiError(404, "Book not found");
+  
+      return res.status(200).json(new ApiResponse(200, updatedBook, "Book updated successfully"));
     } catch (error) {
-          console.log("cant update the book", error);
-        throw new ApiError(400, "sometheing went wrong")
-
-        
+      console.error("Error updating book by name:", error);
+      return res.status(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Something went wrong"));
     }
-
-
-}
+  };
 export const deleteBook = async (req, res) => {
     try {
         const{name}=req.body;

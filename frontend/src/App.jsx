@@ -14,6 +14,10 @@ import ResendEmail from "./pages/resendEmail";
 import SendMobile from "./pages/SendMobile";
 import VerifyOtp from "./pages/VerifyOtp";
 import Aboutme from "./pages/Aboutme";
+import Aboutpage from "./pages/Aboutpage";
+import Books from "./pages/Books";
+import Addbook from "./pages/Addbook";
+
 
  
 function App() {
@@ -30,6 +34,9 @@ function App() {
       <Route path="/sendotp" element={<SendMobile />} />
       <Route path="/verifyotp" element={<VerifyOtp />} />
       <Route path="/me" element={<Aboutme />} />
+      <Route path="/about" element={<Aboutpage />} />
+      <Route path="/books" element={<Books />} />
+      <Route path="/addbooks" element={<Addbook />} />
       
       <Route path="*" element={<PagenotFound />} />
       
