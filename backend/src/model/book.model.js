@@ -29,12 +29,24 @@ const bookSchema = new Schema({
 
 
     },
+      coverImage: {                     // <-- NEW FIELD
+        type: String,
+        default: "",                  // Cloudinary URL stored here
+    },
     bookAddedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
 
     },
+    catagory:{
+        type: String, 
+        required: true, 
+        enum: ["Fiction", "Non-Fiction", "Science", "Technology", "History", "Other"], 
+        
+       
+        
+    }
 
 
 }, { timestamps: true })

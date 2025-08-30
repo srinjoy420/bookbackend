@@ -1,16 +1,19 @@
 import Book from "../model/book.model.js"
 import { ApiResponse } from "../utils/api-Response.js";
 import { ApiError } from "../utils/Api-error.js"
+import { uploadOnCloudnary } from "../utils/cloudnary.js";
 
 export const AddBook = async (req, res) => {
     try {
-        const { name, author, price, published, slno } = req.body;
+        const { name, author, price, published, slno,catagory } = req.body;
         if (!name || !author || !price || !published || !slno) {
             throw new ApiError(404, "all field are required")
 
         }
 
-        const ExistBook = await Book.findOne({ name: name.toLowerCase().trim()  })
+       
+
+        const ExistBook = await Book.findOne({ name: name.toLowerCase().trim() })
         if (ExistBook) {
             throw new ApiError(409, "book exist already")
 
@@ -22,8 +25,12 @@ export const AddBook = async (req, res) => {
             author, published,
             price,
             slno,
+            catagory,
+           
             bookAddedBy: req.user._id,
         })
+
+       
         return res.status(200).json(new ApiResponse(200, book, "Book added successfully"));
 
 
@@ -122,41 +129,60 @@ export const updateBook = async (req, res) => {
 }
 export const updateBookByName = async (req, res) => {
     try {
-      const { name, author, price, published, slno } = req.body;
-  
-      if (!name || !author || !price || !published || !slno) {
-        throw new ApiError(400, "All fields are required");
-      }
-  
-      const updatedBook = await Book.findOneAndUpdate(
-        { name: name.toLowerCase().trim() },
-        { author, price, published, slno },
-        { new: true, runValidators: true }
-      );
-  
-      if (!updatedBook) throw new ApiError(404, "Book not found");
-  
-      return res.status(200).json(new ApiResponse(200, updatedBook, "Book updated successfully"));
+        const { name, author, price, published, slno } = req.body;
+
+        if (!name || !author || !price || !published || !slno) {
+            throw new ApiError(400, "All fields are required");
+        }
+
+        const updatedBook = await Book.findOneAndUpdate(
+            { name: name.toLowerCase().trim() },
+            { author, price, published, slno },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedBook) throw new ApiError(404, "Book not found");
+
+        return res.status(200).json(new ApiResponse(200, updatedBook, "Book updated successfully"));
     } catch (error) {
-      console.error("Error updating book by name:", error);
-      return res.status(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Something went wrong"));
+        console.error("Error updating book by name:", error);
+        return res.status(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Something went wrong"));
     }
-  };
+};
 export const deleteBook = async (req, res) => {
     try {
-        const{name}=req.body;
-        if(!name){
-             throw new ApiError(404, "user nott found please try again")
+        const { name } = req.body;
+        if (!name) {
+            throw new ApiError(404, "user nott found please try again")
         }
-        const book=await Book.findOne({name})
-        if(!book){
-             throw new ApiError(404, "Book nott found please try again")
+        const book = await Book.findOne({ name })
+        if (!book) {
+            throw new ApiError(404, "Book nott found please try again")
         }
-        await book.deleteOne({name})
+        await book.deleteOne({ name })
         return res.status(200).json(new ApiResponse(200, book, "successfully delete the book"));
     } catch (error) {
-          console.log("cant delete the book", error);
+        console.log("cant delete the book", error);
         throw new ApiError(400, "sometheing went wrong")
+
+    }
+
+}
+export const searchCatagory=async(req,res)=>{
+    try {
+        const {catagory}=req.query;
+        if(!catagory){
+            throw new ApiError(404,"please provide us the catagory")
+        }
+        const books=await Book.find({catagory}).populate("bookAddedBy","firstname lastname email")
+        if(books.length===0){
+            throw new ApiError(404,"no books found in this catagory")
+        }
+        res.status(200).json(new ApiResponse(200,books,"fetched succesfully"))
+    } catch (error) {
+        console.log("something wrong finding th error",error);
+        throw new ApiError(400,"cant fetch the catagory books try again later")
+        
         
     }
 

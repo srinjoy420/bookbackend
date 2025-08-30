@@ -11,6 +11,7 @@ import {
 import { CiFaceMeh } from "react-icons/ci";
 import Hero from '@/components/Hero';
 import Background from '@/components/Background';
+import Books from './Books';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -95,6 +96,7 @@ const Home = () => {
           />
         </div>
       </section>
+      
     </div>
   );
 };

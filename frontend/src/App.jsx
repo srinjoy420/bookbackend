@@ -17,6 +17,8 @@ import Aboutme from "./pages/Aboutme";
 import Aboutpage from "./pages/Aboutpage";
 import Books from "./pages/Books";
 import Addbook from "./pages/Addbook";
+import { BookDetails } from "./pages/BookDetails";
+import BookCatagory from "./pages/BookCatagory";
 
 
  
@@ -37,6 +39,8 @@ function App() {
       <Route path="/about" element={<Aboutpage />} />
       <Route path="/books" element={<Books />} />
       <Route path="/addbooks" element={<Addbook />} />
+      <Route path="/book/:id" element={<BookDetails />} />
+      <Route path="/bookcatagory" element={<BookCatagory />} />
       
       <Route path="*" element={<PagenotFound />} />
       
