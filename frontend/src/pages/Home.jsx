@@ -12,6 +12,7 @@ import { CiFaceMeh } from "react-icons/ci";
 import Hero from '@/components/Hero';
 import Background from '@/components/Background';
 import Books from './Books';
+import BookCatagory from './BookCatagory';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -96,6 +97,14 @@ const Home = () => {
           />
         </div>
       </section>
+
+      <section className='mt-12 px-4 md:px-6'>
+        <h2 className="text-2xl md:text-3xl font-semibold text-black mb-4 text-center">
+          Search the books by the catagory
+        </h2>
+        <BookCatagory className='flex justify-center align-middle'/>
+      </section>
+      
       
     </div>
   );
