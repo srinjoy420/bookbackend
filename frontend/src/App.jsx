@@ -19,6 +19,7 @@ import Books from "./pages/Books";
 import Addbook from "./pages/Addbook";
 import { BookDetails } from "./pages/BookDetails";
 import BookCatagory from "./pages/BookCatagory";
+import SearchBook from "./pages/SearchBook";
 
 
  
@@ -41,6 +42,7 @@ function App() {
       <Route path="/addbooks" element={<Addbook />} />
       <Route path="/book/:id" element={<BookDetails />} />
       <Route path="/bookcatagory" element={<BookCatagory />} />
+      <Route path="/search" element={<SearchBook />} />
       
       <Route path="*" element={<PagenotFound />} />
       

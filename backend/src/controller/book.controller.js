@@ -67,7 +67,7 @@ export const getbookbyName = async (req, res) => {
 
 
         }
-        const book = await Book.findOne({ name: name.toLowerCase().trim() }).populate("bookAddedBy", "firstname lastname email");
+        const book = await Book.find({ name: { $regex: name, $options: "i" } }).populate("bookAddedBy", "firstname lastname email");
         return res.status(200).json(new ApiResponse(200, book, "here is your book"))
     } catch (error) {
         console.log("cant fetch the boks", error);
@@ -77,6 +77,20 @@ export const getbookbyName = async (req, res) => {
 
 
 }
+export const searchBooksByName = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.json({ data: [] });
+
+    const books = await Book.find({
+      name: { $regex: query, $options: "i" }, // case-insensitive
+    }).limit(5); // limit suggestions
+
+    res.json({ success: true, data: books });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 export const getBookbyid = async (req, res) => {
     try {
         const { id } = req.params;

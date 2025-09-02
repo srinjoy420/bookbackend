@@ -1,150 +1,118 @@
-import React, { useContext, useState } from 'react'
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Button } from "../components/ui/button";
-import logo from "../assets/Read.png"
-import { authDataContext } from '../context/authContext';
-import { Calendar } from "../components/ui/calendar"
-import { sl } from 'date-fns/locale';
+import axios from "axios";
+import { authDataContext } from "../context/authContext";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const Addbook = () => {
-  const [name, setname] = useState('')
-  const [author, setauthor] = useState('')
-  const [price, setprice] = useState("")
-  const [published, setpublished] = useState("")
-  const [slno, setslno] = useState("")
-  const [catagory, setcatagory] = useState("")
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { serverUrl } = useContext(authDataContext)
-  const [message, setmessage] = useState("")
+const categories = [
+  "Fiction",
+  "Non-Fiction",
+  "Science",
+  "Technology",
+  "History",
+  "Other",
+];
 
+export default function AddBook() {
+  const { serverUrl } = useContext(authDataContext);
+  const [form, setForm] = useState({
+    name: "",
+    author: "",
+    price: "",
+    published: "",
+    slno: "",
+    catagory: "",
+  });
+  const [message, setMessage] = useState(null);
+   const navigate = useNavigate()
 
-  const navigate = useNavigate()
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  // the funtion of handel add book
-  const handeladdbook = async (e) => {
+  const handleCategoryChange = (value) => {
+    setForm({ ...form, catagory: value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const result = await axios.post(`${serverUrl}/api/v1/book/addbook`,
-        { name, author, slno, price, published, catagory }, { withCredentials: true }
-      )
-      setmessage(result.data.message)
-
-
-    } catch (error) {
-      console.log(error);
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Signup failed due to an unknown error";
-      setError(message);
-
+      const res = await axios.post(
+        `${serverUrl}/api/v1/book/addbook`,
+        form,
+        { withCredentials: true }
+      );
+      setMessage({ type: "success", text: res.data.message });
+    } catch (err) {
+      setMessage({ type: "error", text: err.response?.data?.message || "Failed to add book" });
     }
-    finally {
-      setLoading(false)
-    }
+  };
 
-  }
   return (
-    <div className="min-h-screen flex items-start justify-center pt-20 px-4 bg-gray-50">
-      <Card className="w-full max-w-sm shadow-lg">
-        <CardHeader>
-          {/* logo */}
-          <div className='logo' onClick={() => navigate('/')}>
-            <img
-              src={logo}
-              alt="ReadWrite Logo"
-              className="w-16 h-16 object-contain"
-            />
-            {/* heading */}
-            <h1 className="text-xl font-semibold text-center text-gray-800 mb-2">
-              Welcome to Read & Write
-            </h1>
-
-          </div>
-          <CardTitle className="text-center">Register the Book details</CardTitle>
-          <CardDescription className="text-center">
-            Enter book details and ready to shell the boks
-          </CardDescription>
-        </CardHeader>
-
-        {/* the books inputs are here */}
+    <div className="flex justify-center mt-10">
+      <Card className="p-6 w-full max-w-md shadow-xl rounded-2xl">
         <CardContent>
-          <form onSubmit={handeladdbook}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="bookname">Book Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="ramayana"
-                  onChange={(e) => setname(e.target.value)}
-                  value={name}
-                  required
-                />
-              </div>
-              {/* the author */}
-              <div className="grid gap-2">
-                <Label htmlFor="author">Author Name</Label>
-                <Input
-                  id="author"
-                  type="text"
-                  placeholder="Valmiki"
-                  onChange={(e) => setauthor(e.target.value)}
-                  value={author}
-                  required
-                />
-              </div>
-              {/* the pric */}
-              <div className="grid gap-2">
-                <Label htmlFor="price">price</Label>
-                <Input
-                  id="name"
-                  type="number"
-                  placeholder="455"
-                  onChange={(e) => setprice(e.target.value)}
-                  value={price}
-                  required
-                />
-              </div>
-              {/* the slno */}
-              <div className="grid gap-2">
-                <Label htmlFor="slbo">serial no</Label>
-                <Input
-                  id="slno"
-                  type="number"
-                  placeholder="1"
-                  onChange={(e) => setslno(e.target.value)}
-                  value={slno}
-                  required
-                />
-              </div>
-              {/* the date */}
-              <div className="grid gap-2">
-                <Label htmlFor="date">Book Published Date</Label>
-               
-              </div>
+          <h2 className="text-xl font-bold mb-4 text-center">Add a New Book</h2>
+
+          {message && (
+            <p className={`text-center mb-3 ${message.type === "error" ? "text-red-500" : "text-green-500"}`}>
+              {message.text}
+            </p>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label>Name</Label>
+              <Input name="name" value={form.name} onChange={handleChange} required />
             </div>
 
+            <div>
+              <Label>Author</Label>
+              <Input name="author" value={form.author} onChange={handleChange} required />
+            </div>
+
+            <div>
+              <Label>Price</Label>
+              <Input type="number" name="price" value={form.price} onChange={handleChange} required />
+            </div>
+
+            <div>
+              <Label>Serial No</Label>
+              <Input name="slno" value={form.slno} onChange={handleChange} required />
+            </div>
+
+            <div>
+              <Label>Published Date</Label>
+              <Input type="date" name="published" value={form.published} onChange={handleChange} required />
+            </div>
+
+            <div>
+              <Label>Category</Label>
+              <Select onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button type="submit" className="w-full">Add Book</Button>
+            <button className="w-full bg-black text-white border-8" onClick={() => navigate(`/books`)}>Books</button>
+            <button className="w-full bg-black text-white border-8" onClick={() => navigate(`/`)}>Home</button>
+
+            
           </form>
+          
         </CardContent>
       </Card>
-
     </div>
-  )
+  );
 }
-
-export default Addbook

@@ -13,6 +13,7 @@ import Hero from '@/components/Hero';
 import Background from '@/components/Background';
 import Books from './Books';
 import BookCatagory from './BookCatagory';
+import SearchBook from './SearchBook';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -84,8 +85,16 @@ const Home = () => {
         <p className="text-black text-sm md:text-base">Your premium online bookshop experience starts here.</p>
       </section>
 
+      {/* Search Book Section */}
+      <section className="mt-6 px-4 md:px-6">
+        <h2 className="text-xl md:text-2xl font-semibold text-black mb-4 text-center">
+          Search a Book
+        </h2>
+        <SearchBook />
+      </section>
+
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-center mt-10 w-full">
+      <section className="flex flex-col md:flex-row items-center justify-center mt-4 w-full">
         <div className="w-full md:w-1/2">
           <Background heroCount={heroCount} />
         </div>
@@ -98,14 +107,13 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Book Category Section */}
       <section className='mt-12 px-4 md:px-6'>
         <h2 className="text-2xl md:text-3xl font-semibold text-black mb-4 text-center">
           Search the books by the catagory
         </h2>
         <BookCatagory className='flex justify-center align-middle'/>
       </section>
-      
-      
     </div>
   );
 };
