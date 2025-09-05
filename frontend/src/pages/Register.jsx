@@ -20,6 +20,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import { authDataContext } from '../context/authContext';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../../utils/Firebase.js';
+import {  toast } from 'react-toastify';
 
 
 
@@ -44,6 +45,7 @@ export const Register = () => {
         firstname, lastname, email, password
       }, { withCredentials: true })
       if (result.data.success) {
+        toast.success("register succesfully")
         navigate("/")
       }
       console.log(result);
@@ -78,6 +80,7 @@ export const Register = () => {
         firstname,lastname,email
       },{withCredentials:true})
       if (result.data.success) {
+        toast.success("register succesfully")
         navigate("/")
       }
       console.log(result);

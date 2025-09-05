@@ -20,6 +20,7 @@ import { authDataContext } from '../context/authContext';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../../utils/Firebase.js';
 import google from "../assets/google.jpg"
+import {  toast } from 'react-toastify';
 
 const Login = () => {
   const [show, setShow] = useState(false)
@@ -40,6 +41,7 @@ const Login = () => {
         email, password
       }, { withCredentials: true })
       if (result.data.success) {
+        toast.success("login succesfully")
         navigate("/")
       }
       console.log(result);
@@ -71,6 +73,7 @@ const Login = () => {
         firstname,lastname,email
       },{withCredentials:true})
       if (result.data.success) {
+        toast.success("login succesfully")
         navigate("/")
       }
       console.log(result);
