@@ -46,6 +46,9 @@ const bookSchema = new Schema({
         
        
         
+    },
+    bookcover:{
+        type:String
     }
 
 
