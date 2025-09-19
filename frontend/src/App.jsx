@@ -21,15 +21,16 @@ import { BookDetails } from "./pages/BookDetails";
 import BookCatagory from "./pages/BookCatagory";
 import SearchBook from "./pages/SearchBook";
 import { ToastContainer } from 'react-toastify';
+import ProtectedRoute from "./utils/ProtectedRoute ";
 
 
 
 function App() {
   return (
     <div>
-     <ToastContainer />
+      <ToastContainer />
       <Routes>
-        
+
         <Route path="/" element={<Home />} />
         <Route path="/singup" element={<Register />} />
         <Route path="/login" element={<Login />} />
@@ -40,10 +41,10 @@ function App() {
         <Route path="/resendEmail" element={<ResendEmail />} />
         <Route path="/sendotp" element={<SendMobile />} />
         <Route path="/verifyotp" element={<VerifyOtp />} />
-        <Route path="/me" element={<Aboutme />} />
+        <Route path="/me" element={<ProtectedRoute><Aboutme /> </ProtectedRoute>} />
         <Route path="/about" element={<Aboutpage />} />
         <Route path="/books" element={<Books />} />
-        <Route path="/addbooks" element={<Addbook />} />
+        <Route path="/addbooks" element={<ProtectedRoute role="sheller"><Addbook /></ProtectedRoute>} />
         <Route path="/book/:id" element={<BookDetails />} />
         <Route path="/bookcatagory" element={<BookCatagory />} />
         <Route path="/search" element={<SearchBook />} />

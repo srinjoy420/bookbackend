@@ -54,7 +54,7 @@ const Books = () => {
             key={book._id}
             className="shadow-md hover:shadow-xl transition duration-300 cursor-pointer"
             onClick={() => navigate(`/book/${book._id}`)}
-          >
+          >au
             <img
               src={`https://picsum.photos/seed/${book._id}/300/180`}
               alt={book.name}
